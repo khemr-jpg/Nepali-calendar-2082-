@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>नेपाली पात्रो २०२२ - Advanced</title>
+<style>
+  body {
+    font-family: "Kantipur", "Arial", sans-serif;
+    margin: 0; padding: 0;
+    background: #f0f0f0;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 3.5rem;
+    color: #ff9800;
+    text-shadow: 1px 1px 4px #444;
+  }
+  #calendarCanvas {
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    border: 5px solid #ff9800;
+    background: #ffffff;
+  }
+  #controls {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  button {
+    background: #ff9800;
+    border: none;
+    padding: 12px 20px;
+    margin: 6px;
+    border-radius: 14px;
+    color: black;
+    font-weight: 800;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #ffa733;
+  }
+  #tooltip {
+    position: absolute;
+    background: rgba(255, 152, 0, 0.95);
+    color: black;
+    padding: 10px 14px;
+    border-radius: 10px;
+    pointer-events: none;
+    font-weight: bold;
+    font-size: 18px;
+    max-width: 220px;
+    display: none;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body>
+
+<h1>नेपाली पात्रो २०८२ (Advanced)</h1>
+
+<div id="controls">
+  <button onclick="prevMonth()">⬅️ अघिल्लो महिना</button>
+  <button onclick="nextMonth()">अर्को महिना ➡️</button>
+</div>
+
+<canvas id="calendarCanvas" width="850" height="600"></canvas>
+<div id="tooltip"></div>
+
+<script>
+const months = ["बैशाख","जेठ","असार","साउन","भदौ","असोज","कार्तिक","मंसिर","पुष","माघ","फाल्गुन","चैत्र"];
+const daysInMonth = {"बैशाख":31,"जेठ":31,"असार":32,"साउन":31,"भदौ":31,"असोज":31,"कार्तिक":29,"मंसिर":29,"पुष":30,"माघ":29,"फाल्गुन":30,"चैत्र":30};
+const nepaliWeekdays = ["आइत","सोम","मंगल","बुध","बिही","शुक्र","शनि"];
+const holidays = {"बैशाख": {1:"नयाँ वर्ष"}, "जेठ": {3:"बुद्ध जयन्ती"}}; // Add more as needed
+
+function isHoliday(month, day, weekday) {
+  return weekday === 6 || (holidays[month] && holidays[month][day]);
+}
+
+let currentMonthIndex = 0;
+const canvas = document.getElementById("calendarCanvas");
+const ctx = canvas.getContext("2d");
+const tooltip = document.getElementById("tooltip");
+
+function drawCalendar(monthIndex) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const monthName = months[monthIndex];
+  const totalDays = daysInMonth[monthName];
+  const cols = 7, rows = 6;
+  const cellWidth = canvas.width / cols;
+  const cellHeight = (canvas.height - 80) / rows;
+
+  ctx.fillStyle = "#ff9800";
+  ctx.font = "bold 42px Kantipur, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(`${monthName} २०८२`, canvas.width / 2, 50);
+
+  ctx.font = "bold 24px Kantipur, Arial";
+  ctx.fillStyle = "#444";
+  nepaliWeekdays.forEach((day, i) => {
+    ctx.fillText(day, i * cellWidth + cellWidth / 2, 100);
+  });
+
+  let startDay = 3;
+  let day = 1;
+  ctx.font = "bold 24px Kantipur, Arial";
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      let x = c * cellWidth;
+      let y = 120 + r * cellHeight;
+      if (r === 0 && c < startDay) continue;
+      if (day > totalDays) break;
+
+      const isSat = c === 6;
+      const isFest = holidays[monthName]?.[day];
+      ctx.strokeStyle = "#666";
+      ctx.strokeRect(x, y, cellWidth, cellHeight);
+
+      ctx.fillStyle = isSat || isFest ? "red" : "black";
+      ctx.font = "bold 26px Kantipur";
+      ctx.fillText(day, x + cellWidth / 2, y + 35);
+
+      if (isFest) {
+        ctx.fillStyle = "#d2691e";
+        ctx.font = "18px Kantipur";
+        ctx.fillText(holidays[monthName][day], x + cellWidth / 2, y + 65);
+      } else if (isSat) {
+        ctx.fillStyle = "#a00";
+        ctx.fillText("शनिबार बिदा", x + cellWidth / 2, y + 65);
+      }
+      day++;
+    }
+  }
+}
+
+function prevMonth() {
+  currentMonthIndex = (currentMonthIndex + 11) % 12;
+  drawCalendar(currentMonthIndex);
+}
+
+function nextMonth() {
+  currentMonthIndex = (currentMonthIndex + 1) % 12;
+  drawCalendar(currentMonthIndex);
+}
+
+drawCalendar(currentMonthIndex);
+</script>
+
+</body>
+</html>
